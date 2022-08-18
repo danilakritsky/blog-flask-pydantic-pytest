@@ -19,6 +19,7 @@ pytest-cov = "^3.0.0"
 ipython = "^8.4.0"
 flake8 = "^5.0.4"
 python-dotenv = "^0.20.0"
+ipdb = "^0.13.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -30,3 +31,6 @@ addopts = "--cov --cov-report term-missing"
 [tool.black]
 preview = true
 line-length = 79
+
+[tool.mypy]
+show_error_codes = true

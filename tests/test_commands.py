@@ -1,8 +1,21 @@
+import os
+
+import pytest
+
 from src.commands import CreateArticleCommand
 from src.models import Article
 
+import ipdb
 
-def test_create_article():
+
+@pytest.fixture
+def db():
+    os.environ["RUN_ENV"] = "TEST"
+    yield
+    del os.environ["RUN_ENV"]
+
+
+def test_create_article(db):
     """
     GIVEN CreateArticleCommand instance with valid attributes
     WHEN __call__ method called
@@ -15,7 +28,7 @@ def test_create_article():
         title="new article",
         content="this is my new article",
     )
-
+    
     article = create_article_cmd()
 
     assert isinstance(article, Article)
@@ -24,7 +37,7 @@ def test_create_article():
         assert getattr(article, attr_name) == getattr(
             create_article_cmd, attr_name
         )
-
-    stored_article = Article.get_by_id(id)
+    
+    stored_article = Article.get_by_id(article.id)
 
     assert article == stored_article
