@@ -3,7 +3,7 @@ import os
 import pytest
 from src.models import Article
 
-from src.queries import ListArticlesQuery
+from src.queries import GetArticleByIdQuery, ListArticlesQuery
 from src.commands import CreateArticleCommand
 
 
@@ -36,3 +36,13 @@ def test_list_articles_query(articles):
     query = ListArticlesQuery()
     fetched_articles = query()
     assert all(article in articles for article in fetched_articles)
+
+
+def test_get_articles_by_id(articles):
+    """
+    GIVEN GetArticleByIdQuery
+    WHEN __call__ method is called with a valid id
+    THEN an article with this id is retrieved from database and returned
+    """
+    article = GetArticleByIdQuery(articles[0].id)
+    assert article == articles[0]
