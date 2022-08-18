@@ -1,11 +1,10 @@
 import os
 
+import ipdb
 import pytest
 
 from src.commands import CreateArticleCommand
 from src.models import Article
-
-import ipdb
 
 
 @pytest.fixture
@@ -28,7 +27,7 @@ def test_create_article(db):
         title="new article",
         content="this is my new article",
     )
-    
+    # ipdb.set_trace()
     article = create_article_cmd()
 
     assert isinstance(article, Article)
@@ -37,7 +36,7 @@ def test_create_article(db):
         assert getattr(article, attr_name) == getattr(
             create_article_cmd, attr_name
         )
-    
+
     stored_article = Article.get_by_id(article.id)
 
     assert article == stored_article

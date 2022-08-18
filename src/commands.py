@@ -8,7 +8,9 @@ class CreateArticleCommand(BaseModel):
     title: str
     content: str
 
-    def __call__(self):
-        return Article(
+    def __call__(self) -> Article:
+        article: Article = Article(
             author=self.author, title=self.title, content=self.content
         )
+        article.save()
+        return article
