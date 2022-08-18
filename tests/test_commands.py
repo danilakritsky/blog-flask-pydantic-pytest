@@ -1,5 +1,3 @@
-from dataclasses import fields
-
 from src.commands import CreateArticleCommand
 from src.models import Article
 
@@ -22,7 +20,7 @@ def test_create_article():
 
     assert isinstance(article, Article)
 
-    for attr_name in fields(create_article_cmd):
+    for attr_name in create_article_cmd.__dict__:
         assert getattr(article, attr_name) == getattr(
             create_article_cmd, attr_name
         )
