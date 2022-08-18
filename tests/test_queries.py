@@ -44,5 +44,5 @@ def test_get_articles_by_id(articles):
     WHEN __call__ method is called with a valid id
     THEN an article with this id is retrieved from database and returned
     """
-    article = GetArticleByIdQuery(articles[0].id)
+    article = GetArticleByIdQuery(id=articles[0].id)()
     assert article == articles[0]

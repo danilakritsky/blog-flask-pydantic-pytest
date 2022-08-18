@@ -12,5 +12,8 @@ class ListArticlesQuery(BaseModel):
         return articles
 
 
-class GetArticleByIdQuery(Base):
-    pass
+class GetArticleByIdQuery(BaseModel):
+    id: str
+
+    def __call__(self) -> Article:
+        return Article.get_by_id(self.id)
