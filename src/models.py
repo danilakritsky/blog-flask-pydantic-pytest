@@ -1,7 +1,10 @@
+"""Contains our domain models."""
+
 import os
 import sqlite3
 import uuid
 from functools import wraps
+from typing import Callable
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, EmailStr, Field
@@ -16,7 +19,7 @@ class Article(BaseModel):
     content: str
 
     @staticmethod
-    def ensure_table(func):
+    def ensure_table(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             Article.create_table()
@@ -71,7 +74,7 @@ class Article(BaseModel):
         return db
 
     @staticmethod
-    def get_connection():
+    def get_connection() -> sqlite3.Connection:
         con: sqlite3.Connection = sqlite3.connect(
             Article._get_db_path(), uri=True
         )
