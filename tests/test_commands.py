@@ -7,10 +7,12 @@ from src.commands import CreateArticleCommand
 from src.models import Article
 
 
-@pytest.fixture
+@pytest.fixture()
 def db():
     os.environ["RUN_ENV"] = "TEST"
     yield
+    # drop :memory: database to avoid persistint across modules
+    Article.test_db_connection.close() 
     del os.environ["RUN_ENV"]
 
 

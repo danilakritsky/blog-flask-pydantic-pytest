@@ -81,7 +81,7 @@ class Article(BaseModel):
         return con
 
     @ensure_table
-    def save(self):
+    def save(self) -> None:
         con: sqlite3.Connection = Article.get_connection()
         with con:
             con.execute(
@@ -94,3 +94,17 @@ class Article(BaseModel):
                 (self.id, self.author, self.title, self.content),
             )
         con.close()
+
+    @classmethod
+    @ensure_table
+    def get_all(cls) -> list["Article"]:
+        con: sqlite3.Connection = Article.get_connection()
+        con.row_factory = sqlite3.Row
+        with con:
+            res: list[Article] = [
+                cls(**row) for row in con.execute(
+                    """SELECT * FROM articles""",
+                )
+            ]
+        con.close()
+        return res

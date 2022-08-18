@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from src.models import Article
 
 from src.queries import ListArticlesQuery
 from src.commands import CreateArticleCommand
@@ -10,10 +11,11 @@ from src.commands import CreateArticleCommand
 def db():
     os.environ['RUN_ENV'] = 'TEST'
     yield
+    Article.test_db_connection.close()
     del os.environ['RUN_ENV']
 
 @pytest.fixture
-def articles():
+def articles(db):
     articles = []
     for title in ('First post', 'Second post'):
         articles.append(
@@ -31,6 +33,6 @@ def test_list_articles_query(articles):
     WHEN __call__ method is executed
     THEN a list of all articles stored in the database is returned
     """
-
-    fetched_articles = ListArticlesQuery()
-    assert fetched_articles == articles
+    query = ListArticlesQuery()
+    fetched_articles = query()
+    assert all(article in articles for article in fetched_articles)
