@@ -25,6 +25,6 @@ def test_create_article():
             create_article_cmd, attr_name
         )
 
-    stored_article = Article.get_by_id(article, id)
+    stored_article = Article.get_by_id(id)
 
     assert article == stored_article

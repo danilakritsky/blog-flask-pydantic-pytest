@@ -8,7 +8,6 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 
-
 class Article(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     author: EmailStr
@@ -19,8 +18,26 @@ class Article(BaseModel):
     def get_by_id(cls, id: str):
         # not using the context manager since it just commits, 
         # and does note close the connection
-        con: sqlite3.Connection = sqlite3.connect(os.getenv('DB_PATH', ':memory:'))
+        con: sqlite3.Connection = sqlite3.connect(
+            os.getenv('DB_PATH', ':memory:')
+        )
         cur: sqlite3.Cursor = con.cursor()
-        res: sqlite3.Cursor = cur.execute('SELECT * FROM articles WHERE id = ?', (id,))
+        res: sqlite3.Cursor = cur.execute(
+            'SELECT * FROM articles WHERE id = ?', (id,)
+        )
         article: Article = cls(**res.fetchone())
+        con.close()  # !!! close the connection
         return article
+
+    @classmethod
+    def create_table(cls):
+        con: sqlite3.Connection = sqlite3.connect(
+            os.getenv('DB_PATH', ':memory:')
+        )
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS 
+            articles(id TEXT, author TEXT, title TEXT, content TEXT)
+            """
+        )
+        con.close()
