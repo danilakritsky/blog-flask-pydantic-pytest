@@ -25,13 +25,12 @@ class Article(BaseModel):
             return func(*args, **kwargs)
         return wrapper
 
-
     @classmethod
     @ensure_table
     def get_by_id(cls, id: str) -> 'Article':
         # not using the context manager since it just commits the transaction,
         # and does note close the connection
-        con: sqlite3.Connection = sqlite3.connect(Article.get_db())
+        con: sqlite3.Connection = sqlite3.connect(Article.get_db(), uri=True)
         cur: sqlite3.Cursor = con.cursor()
         res: sqlite3.Cursor = cur.execute(
             "SELECT * FROM articles WHERE id = ?", (id,)
@@ -47,27 +46,28 @@ class Article(BaseModel):
     
     @staticmethod
     def create_table() -> None:
-        con: sqlite3.Connection = sqlite3.connect(
-            Article.get_db()
-        )
-        con.execute(
-            """
-            CREATE TABLE IF NOT EXISTS
-            articles(id TEXT, author TEXT, title TEXT, content TEXT)
-            """
-        )
+        con: sqlite3.Connection = sqlite3.connect(Article.get_db(), uri=True)
+        with con:
+            con.execute(
+                """
+                CREATE TABLE IF NOT EXISTS
+                articles(id TEXT, author TEXT, title TEXT, content TEXT)
+                """
+            )
         if os.getenv("RUN_ENV") != "TEST":
             con.close()  # don't close for inmemory db
+        else:
+            # if env is TEST keep connection alive for the db to persist
+            return con
 
     @staticmethod
     def get_db() -> str:
         db: str
-        if os.getenv("RUN_ENV") == "TEST":
-            db = os.getenv("TEST_DB_PATH") or ":memory:"
+        if os.getenv('RUN_ENV') == 'TEST':
+            db = os.getenv('TEST_DB_PATH') or 'file::memory:?cache=shared'
         else:
-            db = os.getenv("DB_PATH") or "database.db"
+            db = os.getenv('DB_PATH') or "database.db"
         return db
-
 
 
 
