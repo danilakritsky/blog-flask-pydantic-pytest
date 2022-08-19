@@ -35,7 +35,7 @@ class Article(BaseModel):
     content: str
 
     @staticmethod
-    def ensure_table(func: Callable) -> Callable:
+    def _ensure_table(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             Article.create_table()
@@ -44,7 +44,7 @@ class Article(BaseModel):
         return wrapper
 
     @classmethod
-    @ensure_table
+    @_ensure_table
     def get_by_id(cls, id: str) -> "Article":
         # not using the context manager since it just commits the transaction,
         # and does note close the connection
@@ -74,7 +74,7 @@ class Article(BaseModel):
         con.close()
 
     
-    @ensure_table
+    @_ensure_table
     def save(self) -> None:
         con: Connection = get_connection()
         with con:
@@ -90,7 +90,7 @@ class Article(BaseModel):
         con.close()
 
     @classmethod
-    @ensure_table
+    @_ensure_table
     def get_all(cls) -> list["Article"]:
         con: Connection = get_connection()
         with con:
