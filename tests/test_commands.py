@@ -1,18 +1,22 @@
 import os
+import sqlite3
 
-import ipdb
 import pytest
+from dotenv import load_dotenv
 
 from src.commands import CreateArticleCommand
 from src.models import Article
 
+load_dotenv()
 
 @pytest.fixture()
 def db():
     os.environ["RUN_ENV"] = "TEST"
+    con = sqlite3.connect(
+        os.getenv("TEST_DB_PATH") or "file::memory:?cache=shared"
+    )
     yield
-    # drop :memory: database to avoid persistint across modules
-    Article.test_db_connection.close() 
+    con.close()
     del os.environ["RUN_ENV"]
 
 

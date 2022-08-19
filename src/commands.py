@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr
 
 from .models import Article
 
+
 # commands in CQRS are responsible for writing to the db
 class CreateArticleCommand(BaseModel):
     author: EmailStr

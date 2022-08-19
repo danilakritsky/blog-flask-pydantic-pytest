@@ -1,15 +1,31 @@
-"""Contains our domain models."""
+"""Contains domain models."""
 
 import os
 import sqlite3
 import uuid
 from functools import wraps
 from typing import Callable
+from sqlite3 import Cursor, Connection, Row
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, EmailStr, Field
 
 load_dotenv()
+
+
+def get_db_path() -> str:
+    db: str
+    if os.getenv("RUN_ENV") == "TEST":
+        db = os.getenv("TEST_DB_PATH") or "file::memory:?cache=shared"
+    else:
+        db = os.getenv("DB_PATH") or "database.db"
+    return db
+
+
+def get_connection() -> Connection:
+    con: Connection = sqlite3.connect(get_db_path(), uri=True)
+    con.row_factory: Row = sqlite3.Row  # dict rows
+    return con
 
 
 class Article(BaseModel):
@@ -32,14 +48,12 @@ class Article(BaseModel):
     def get_by_id(cls, id: str) -> "Article":
         # not using the context manager since it just commits the transaction,
         # and does note close the connection
-        con: sqlite3.Connection = Article.get_connection()
-        con.row_factory = sqlite3.Row  # dict rows
-        cur: sqlite3.Cursor = con.cursor()
-        res: sqlite3.Cursor = cur.execute(
+        con: Connection = get_connection()
+        queryset: Cursor = con.execute(
             "SELECT * FROM articles WHERE id = ?", (id,)
         )
 
-        article: Article = cls(**res.fetchone())
+        article: Article = cls(**queryset.fetchone())
         con.close()  # !!! close the connection
         return article
 
@@ -49,40 +63,20 @@ class Article(BaseModel):
 
     @staticmethod
     def create_table() -> None:
-        con: sqlite3.Connection = Article.get_connection()
-        with con:
+        con: Connection = get_connection()
+        with con:  # commit transaction on exit
             con.execute(
                 """
                 CREATE TABLE IF NOT EXISTS
                 articles(id TEXT, author TEXT, title TEXT, content TEXT)
                 """
             )
+        con.close()
 
-        if os.getenv("RUN_ENV") != "TEST":
-            con.close()
-        else:
-            # if env is TEST keep connection alive for the db to persist
-            setattr(Article, "test_db_connection", con)
-
-    @staticmethod
-    def _get_db_path() -> str:
-        db: str
-        if os.getenv("RUN_ENV") == "TEST":
-            db = os.getenv("TEST_DB_PATH") or "file::memory:?cache=shared"
-        else:
-            db = os.getenv("DB_PATH") or "database.db"
-        return db
-
-    @staticmethod
-    def get_connection() -> sqlite3.Connection:
-        con: sqlite3.Connection = sqlite3.connect(
-            Article._get_db_path(), uri=True
-        )
-        return con
-
+    
     @ensure_table
     def save(self) -> None:
-        con: sqlite3.Connection = Article.get_connection()
+        con: Connection = get_connection()
         with con:
             con.execute(
                 """
@@ -98,13 +92,13 @@ class Article(BaseModel):
     @classmethod
     @ensure_table
     def get_all(cls) -> list["Article"]:
-        con: sqlite3.Connection = Article.get_connection()
-        con.row_factory = sqlite3.Row
+        con: Connection = get_connection()
         with con:
-            res: list[Article] = [
-                cls(**row) for row in con.execute(
+            articles: list[Article] = [
+                cls(**row)
+                for row in con.execute(
                     """SELECT * FROM articles""",
                 )
             ]
         con.close()
-        return res
+        return articles

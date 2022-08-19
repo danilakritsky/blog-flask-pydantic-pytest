@@ -1,28 +1,34 @@
 import os
+import sqlite3
 
 import pytest
-from src.models import Article
+from dotenv import load_dotenv
 
-from src.queries import GetArticleByIdQuery, ListArticlesQuery
 from src.commands import CreateArticleCommand
+from src.queries import GetArticleByIdQuery, ListArticlesQuery
+
+load_dotenv()
 
 
 @pytest.fixture()
 def db():
-    os.environ['RUN_ENV'] = 'TEST'
+    os.environ["RUN_ENV"] = "TEST"
+    con = sqlite3.connect(
+        os.getenv("TEST_DB_PATH") or "file::memory:?cache=shared"
+    )
     yield
-    Article.test_db_connection.close()
-    del os.environ['RUN_ENV']
+    con.close()
+    del os.environ["RUN_ENV"]
+
 
 @pytest.fixture
 def articles(db):
     articles = []
-    for title in ('First post', 'Second post'):
+    for title in ("First post", "Second post"):
         articles.append(
             CreateArticleCommand(
-                author='john@mailbox.com',
-                title=title,
-                content='Test post')()
+                author="john@mailbox.com", title=title, content="Test post"
+            )()
         )
     return articles
 
