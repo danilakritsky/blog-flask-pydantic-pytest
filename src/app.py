@@ -12,3 +12,11 @@ def create_article():
     article = CreateArticleCommand(**request.json)()
     # return the dict representation of an object to convert to JSON
     return jsonify(article.dict())
+
+
+@app.route('/articles/<article_id>/', methods=["GET"])
+def get_article(article_id):
+    article = GetArticleByIdQuery(id=article_id)()
+    # return the dict representation of an object to convert to JSON
+    return jsonify(article.dict())
+

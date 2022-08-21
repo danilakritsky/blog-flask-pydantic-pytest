@@ -1,5 +1,7 @@
 import json
 import pathlib
+import sqlite3
+import os
 
 import pytest
 import jsonschema
@@ -8,7 +10,9 @@ from src.app import app
 from src.models import Article
 
 
+
 SCHEMAS_DIR = pathlib.Path(__file__).parent / 'schemas'
+
 
 def validate_payload(payload, schema_name):
     schema = json.load(open(SCHEMAS_DIR / schema_name))
@@ -22,8 +26,19 @@ def validate_payload(payload, schema_name):
     )
 
 
+@pytest.fixture()
+def db():
+    os.environ["RUN_ENV"] = "TEST"
+    con = sqlite3.connect(
+        os.getenv("TEST_DB_PATH") or "file::memory:?cache=shared"
+    )
+    yield
+    con.close()
+    del os.environ["RUN_ENV"]
+
+
 @pytest.fixture
-def client():
+def client(db):
     app.config["TESTING"] = True
 
     with app.test_client() as client:
@@ -46,4 +61,22 @@ def test_create_article(client):
         '/articles/',
         data=json.dumps(article),
         content_type="application/json")
+    validate_payload(response.json, 'Article.json')
+
+def test_get_article(client):
+    """
+    GIVEN an article id
+    WHEN GET is called on an endpoint
+    THEN an articles with the given id is returned
+    """
+    article = Article(**{
+        "author": "john@doe.com",
+        "title": "New Article",
+        "content": "This is a new article"
+    })
+    article.save()
+    response = client.get(
+        f'/articles/{article.id}/',
+        content_type='application/json'
+    )
     validate_payload(response.json, 'Article.json')
