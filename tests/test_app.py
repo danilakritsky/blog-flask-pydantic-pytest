@@ -2,7 +2,6 @@ import json
 import os
 import pathlib
 import sqlite3
-from urllib import response
 
 import jsonschema
 import pytest
@@ -133,22 +132,25 @@ def test_create_article_bad_request(client, data):
     assert response.status_code == 400
     assert response.json is not None
 
+
+# we don't need the test client here since we test against the real db
 @pytest.mark.e2e
-def test_create_list_get():  # we don't need the test client here since we test against the real db
+def test_create_list_get():
     requests.post(
         "http://localhost:5000/articles/",
         json={
             "author": "john@doe.com",
             "title": "New Article",
-            "content": "Some extra awesome content"
-        }
+            "content": "Some extra awesome content",
+        },
     )
 
     articles = requests.get(
         "http://localhost:5000/articles/",
     ).json()
 
-
-    response = requests.get(f"http://localhost:5000/articles/{articles[0]['id']}/")
+    response = requests.get(
+        f"http://localhost:5000/articles/{articles[0]['id']}/"
+    )
 
     assert response.status_code == 200

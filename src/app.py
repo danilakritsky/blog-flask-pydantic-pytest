@@ -1,12 +1,9 @@
-from crypt import methods
-from urllib import request
-
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, Response
+from flask import Flask, Response, jsonify, request
 from pydantic import ValidationError
 
-from src.models import Article
 from src.commands import CreateArticleCommand
+from src.models import Article
 from src.queries import GetArticleByIdQuery, ListArticlesQuery
 
 load_dotenv()

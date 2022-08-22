@@ -24,7 +24,7 @@ def get_db_path() -> str:
 
 def get_connection() -> Connection:
     con: Connection = sqlite3.connect(get_db_path(), uri=True)
-    con.row_factory: Row = sqlite3.Row  # dict rows
+    con.row_factory = sqlite3.Row  # dict rows
     return con
 
 
