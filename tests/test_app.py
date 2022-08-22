@@ -2,6 +2,7 @@ import json
 import pathlib
 import sqlite3
 import os
+from urllib import response
 
 import pytest
 import jsonschema
@@ -48,7 +49,7 @@ def client(db):
 def test_create_article(client):
     """
     GIVEN data for a new article
-    WHEN post is called on an endpoint
+    WHEN POST is called on the /articles/ endpoint
     THEN a new article is returned as a JSON that matches its schema
     """
     article = {
@@ -66,7 +67,7 @@ def test_create_article(client):
 def test_get_article(client):
     """
     GIVEN an article id
-    WHEN GET is called on an endpoint
+    WHEN GET is called on the /articles/<article_id>/ endpoint
     THEN an articles with the given id is returned
     """
     article = Article(**{
@@ -80,3 +81,22 @@ def test_get_article(client):
         content_type='application/json'
     )
     validate_payload(response.json, 'Article.json')
+
+def test_list_articles(client):
+    """
+    GIVEN articles stored in a database
+    WHEN GET is  callend on the /articles/ endpoint
+    THEN an article list is retrieved and returned
+    """
+    for title in ('First Article', 'Second Article'):
+        Article(**{
+            "author": "john@doe.com",
+            "title": title,
+            "content": "This is a new article"
+        }).save()
+
+    response = client.get(
+        '/articles/',
+        content_type='application/json'
+    )
+    validate_payload(response.json, 'ArticleList.json')

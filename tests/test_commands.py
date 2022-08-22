@@ -33,7 +33,7 @@ def test_create_article(db):
         title="new article",
         content="this is my new article",
     )
-    # ipdb.set_trace()
+
     article = create_article_cmd()
 
     assert isinstance(article, Article)
