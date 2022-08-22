@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "blog-flask-pydantic-pytest"
+name = "blog-tdd-flask-pydantic-pytest"
 version = "0.1.0"
-description = "A Flask blog app that uses pydantic for validation and pytest for testing."
+description = "A small Flask blog app demonstrating the TDD aproach."
 authors = ["Danila Kritsky <danilakritsky@gmail.com>"]
 license = "MIT"
 
