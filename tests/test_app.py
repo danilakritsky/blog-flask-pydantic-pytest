@@ -100,3 +100,37 @@ def test_list_articles(client):
         content_type='application/json'
     )
     validate_payload(response.json, 'ArticleList.json')
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "author": "John Doe",
+            "title": "New Article",
+            "content": "Some extra awesome content"
+        },
+        {
+            "author": "John Doe",
+            "title": "New Article",
+        },
+        {
+            "author": "John Doe",
+            "title": None,
+            "content": "Some extra awesome content"
+        }
+    ]
+)
+def test_create_article_bad_request(client, data):
+    """
+    GIVEN payload with missing/incorrect fields
+    WHEN POST request is made against the /articles/ endpoint
+    THEN a 400 status is returned with a message detailing the error 
+    """
+    response = client.post(
+        '/articles/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    print(response.json)
+    assert response.status_code == 400
+    assert response.json is not None
