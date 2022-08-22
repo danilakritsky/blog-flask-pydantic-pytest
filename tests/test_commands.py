@@ -9,6 +9,7 @@ from src.models import Article
 
 load_dotenv()
 
+
 @pytest.fixture()
 def db():
     os.environ["RUN_ENV"] = "TEST"

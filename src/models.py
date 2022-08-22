@@ -4,8 +4,8 @@ import os
 import sqlite3
 import uuid
 from functools import wraps
+from sqlite3 import Connection, Cursor, Row
 from typing import Callable
-from sqlite3 import Cursor, Connection, Row
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, EmailStr, Field
@@ -73,7 +73,6 @@ class Article(BaseModel):
             )
         con.close()
 
-    
     @_ensure_table
     def save(self) -> None:
         con: Connection = get_connection()
